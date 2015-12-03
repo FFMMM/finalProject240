@@ -3,6 +3,7 @@
 #include "Signal.h"
 #include "DTW.h"
 #include "PlotDTW.h"
+#include <stdlib.h>
 
 /*
 Given two files, this class turns them into signals, gets the DTW part 
