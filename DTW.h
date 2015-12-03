@@ -19,6 +19,9 @@ class DTW
 		// Constructor takes in two Singnal instances and initializes its own private Signal fields.
 		DTW(Signal signalA, Signal signalB); 
 
+		// Copy constructor.
+		DTW::DTW((const DTW& copy));
+
 		~DTW(){}; //Default destructor
 		// Method returns a vector containing the comparison between the two signals.
 		vector<double> getComparison();

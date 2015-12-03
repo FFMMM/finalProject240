@@ -15,6 +15,15 @@ DTW::DTW(Signal signalA, Signal signalB)
 
 }
 
+DTW::DTW((const DTW& copy))
+// Copy constructor
+{
+	myCompared = copy.myCompared;
+	myComparison = copy.myComparison;
+	setFirst(copy.getFirst());
+	setSecond(copy.getSecond());
+}
+
 vector<double> DTW::getComparison()
 // Method returns a vector containing the comparison between the two signals.
 {
