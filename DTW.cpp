@@ -1,4 +1,5 @@
 #include "DTW.h"
+#include "Signal.h"
 #include <iostream>
 #include <cmath> // for the absolute function
 #include <algorithm> // for the max function
@@ -15,13 +16,13 @@ DTW::DTW(Signal signalA, Signal signalB)
 
 }
 
-DTW::DTW((const DTW& copy))
+DTW::DTW(const DTW& copy)
 // Copy constructor
 {
-	myCompared = copy.myCompared;
-	myComparison = copy.myComparison;
-	setFirst(copy.getFirst());
-	setSecond(copy.getSecond());
+	this->myCompared = copy.myCompared;
+	this->myComparison = copy.myComparison;
+	this->setFirst(copy.getFirst());
+	this->setSecond(copy.getSecond());
 }
 
 vector<double> DTW::getComparison()
@@ -32,13 +33,13 @@ vector<double> DTW::getComparison()
 	return myComparison;
 } 
 
-Signal DTW::getFirst()
+Signal DTW::getFirst() const
 // Accessor returns SignalA
 {
 	return mySignalA;
 }
 
-Signal DTW::getSecond()
+Signal DTW::getSecond() const
 // Accessor returns SignalB
 {
 	return mySignalB;
@@ -67,7 +68,7 @@ void DTW::compare()
 	{
 		//Do nothing else but:
 		myCompared = true;
-		myComparison = mySignalA;
+		myComparison = mySignalA.getSignalData();
 	}
 	else
 	{ 
@@ -80,21 +81,24 @@ void DTW::initiateDTW()
 // method calls on the data forwarding algorithm
 {	
 	// we want to add a locality constraint
-	int windowSize = abs(mySignalA.getSignalData().size() - mySignalB.getSignalData().size());
+	int windowSize = abs((int)(mySignalA.getSignalData().size() - mySignalB.getSignalData().size()));
 
 	DTWDistance(mySignalA.getSignalData(), mySignalB.getSignalData(), windowSize);
 }
 
-double DTWDistance(vector<double> first, vector<double> seoncd, int windowSize)
+double DTW::DTWDistance(vector<double> first, vector<double> second, int windowSize)
 // method performs the DTW and updates the myComparison vector
 {
 	double myDTW[first.size()+1][second.size()+1];
 
-	windowSize = max(windowSize, abs(first.size()-second.size()));
+	int first_size = first.size();
+	int second_size = second.size();
+
+	windowSize = max(windowSize, abs(first_size - second_size));
 
 	// intializing all entries to the most "expensive" path possible
-	for(int i = 0; i < first.size(); i++)
-		for(int j = 0; j < second.size(); j++)
+	for(int i = 0; i < first_size; i++)
+		for(int j = 0; j < second_size; j++)
 			myDTW[i][j] = DBL_MAX;
 
 	myDTW[0][0] = 0;
@@ -102,13 +106,13 @@ double DTWDistance(vector<double> first, vector<double> seoncd, int windowSize)
 
 	double cost = 0; 
 
-	for( int i = 1; i < first.size(); i++)
-		for( int j = max(1, i-windowSize); j < min(second.size(), i + windowSize); j++)
+	for(int i = 1; i < first_size; i++)
+		for(int j = max(1, (i-windowSize) ); j < min(second_size, (i + windowSize)); j++)
 		{
 			cost = abs(first.at(i) - second.at(i));
 
 			myDTW[i][j] = cost + min(myDTW[i-1][j], min(myDTW[i][j-1], myDTW[i-1][j-1])); //where the minimum compares the inseration, deletion and match cases
-			myComparison.push_back(myDTW);
+			myComparison.push_back(myDTW[i][j]);
 		}
 
 	return myDTW[first.size()][second.size()];

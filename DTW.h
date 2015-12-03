@@ -14,21 +14,21 @@ class DTW
 		vector<double> myComparison; // vector that holds the result of the comparison between  the two Signals.
 		void compare(); // method compares SignalA to SignalB
 		void initiateDTW(); // method calls on the data forwarding algorithm
-		double DTWDistance(); // method performs the DTW and updates the myComparison vector.
+		double DTWDistance(vector<double> first, vector<double> second, int windowSize); // method performs the DTW and updates the myComparison vector.
 	public:
 		// Constructor takes in two Singnal instances and initializes its own private Signal fields.
 		DTW(Signal signalA, Signal signalB); 
 
 		// Copy constructor.
-		DTW::DTW((const DTW& copy));
+		DTW(const DTW& copy);
 
 		~DTW(){}; //Default destructor
 		// Method returns a vector containing the comparison between the two signals.
 		vector<double> getComparison();
 
 		// Accessors to query the Signal fields of the existing DTW class instance
-		Signal getFirst();
-		Signal getSecond();
+		Signal getFirst() const;
+		Signal getSecond() const;
 		
 		// Mutators to easily modify signals that need to be compared. Obviously, a call to any one of these methods requires the comparsion to be performed again.
 		void setFirst(Signal signalA);
