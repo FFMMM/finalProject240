@@ -114,6 +114,6 @@ double DTW::DTWDistance(vector<double> first, vector<double> second, int windowS
 			myDTW[i][j] = cost + min(myDTW[i-1][j], min(myDTW[i][j-1], myDTW[i-1][j-1])); //where the minimum compares the inseration, deletion and match cases
 			myComparison.push_back(myDTW[i][j]);
 		}
-
+	//Hey Alex I just added a sample comment. Lets see if it commits
 	return myDTW[first.size()][second.size()];
 }
