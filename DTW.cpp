@@ -16,6 +16,13 @@ DTW::DTW(Signal signalA, Signal signalB)
 
 }
 
+DTW::DTW()
+//Default Constructor
+{
+	myCompared = false;
+	/*Implicitly call default constructors for mySigA, B*/
+}
+
 DTW::DTW(const DTW& copy)
 // Copy constructor
 {
@@ -25,7 +32,7 @@ DTW::DTW(const DTW& copy)
 	this->setSecond(copy.getSecond());
 }
 
-vector<double> DTW::getComparison()
+vector<DTW::Coord> DTW::getComparison()
 // Method returns a vector containing the comparison between the two signals.
 {
 	if(myCompared == false)
@@ -59,7 +66,6 @@ void DTW::setSecond(Signal signalB)
 	mySignalB = signalB;
 }
 
-// ------------- Public Interface Ends -----------------------
 
 void DTW::compare()
 // Method compares SignalA to SignalB
@@ -67,27 +73,35 @@ void DTW::compare()
 	if(getFirst() == getSecond())
 	{
 		//Do nothing else but:
-		myCompared = true;
-		myComparison = mySignalA.getSignalData();
+		for(int i=0; i< getFirst().getData().size(); i++)
+		{
+			myComparison.push_back(Coord());
+			myComparison[i].x = i;
+			myComparison[i].y = i;
+		}
 	}
 	else
 	{ 
 		initiateDTW();
 	}
-
+	myCompared = true;
 }
+
+// ------------- Public Interface Ends -----------------------
 
 void DTW::initiateDTW()
 // method calls on the data forwarding algorithm
 {	
 	// we want to add a locality constraint
-	int windowSize = abs((int)(mySignalA.getSignalData().size() - mySignalB.getSignalData().size()));
+	int windowSize = abs((int)(mySignalA.getData().size() - mySignalB.getData().size()));
 
-	DTWDistance(mySignalA.getSignalData(), mySignalB.getSignalData(), windowSize);
+	DTWDistance(mySignalA.getData(), mySignalB.getData(), windowSize);
+
 }
 
 double DTW::DTWDistance(vector<double> first, vector<double> second, int windowSize)
-// method performs the DTW and updates the myComparison vector
+// method builds the cost matrix, finds minimizing path,
+// and returns total distance between signals
 {
 	double myDTW[first.size()+1][second.size()+1];
 
@@ -102,7 +116,6 @@ double DTW::DTWDistance(vector<double> first, vector<double> second, int windowS
 			myDTW[i][j] = DBL_MAX;
 
 	myDTW[0][0] = 0;
-	myComparison.push_back(myDTW[0][0]);
 
 	double cost = 0; 
 
@@ -112,8 +125,43 @@ double DTW::DTWDistance(vector<double> first, vector<double> second, int windowS
 			cost = abs(first.at(i) - second.at(i));
 
 			myDTW[i][j] = cost + min(myDTW[i-1][j], min(myDTW[i][j-1], myDTW[i-1][j-1])); //where the minimum compares the inseration, deletion and match cases
-			myComparison.push_back(myDTW[i][j]);
 		}
-	//Hey Alex I just added a sample comment. Lets see if it commits
+/*
+//This material added by David B. -----
+	//Backtrack from upper right-hand corner
+	int i = getFirst.size() - 1;
+	int j = getSecond.size() - 1;
+	while (i >= 0 && j >= 0)
+	{
+	myComparison.push_back(Coord());
+	myComparison.back.x = i;
+	myComparison.back.y = j;
+		if (i==0)
+		{
+			--j;
+		}
+		else if (j==0)
+		{
+			--i;
+		}
+		else
+		{
+			if (myDTW[i-1][j] == min(myDTW[i-1][j], myDTW[i-1][j-1], myDTW[i][j-1]))
+			{
+				--i;
+			}
+			else if (myDTW[i-1][j-1] == min(myDTW[i-1][j], myDTW[i-1][j-1], myDTW[i][j-1]))
+			{
+				--i;
+				--j;
+			}
+			else
+			{
+				--j;
+			}
+		}
+	}
+//End David B. addition -----
+*/
 	return myDTW[first.size()][second.size()];
 }
