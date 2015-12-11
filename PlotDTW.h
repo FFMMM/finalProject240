@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QtGui>
 #include <QtCore>
+#include <QString>
+#include <vector>
 
 #include "DummyDTW.h"
 
@@ -22,10 +24,18 @@ class PlotDTW : public QMainWindow //Plot extends a Window
 
     private:
         Ui::PlotDTW *ui;
-	DummyDTW myDTW;
+	    DummyDTW myDTW;
+
+        const static int TICKNUM = 5;
+        const static int TICKNUMX = 6;
+        double labelQuery[TICKNUM];
+        double labelReference[TICKNUM];
+
+        void findTickValues();
 
     protected:
         void paintEvent(QPaintEvent* e);
+
 };
 
 #endif // PlotDTW_H

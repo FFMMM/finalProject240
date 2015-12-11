@@ -59,21 +59,72 @@ void PlotDTW::paintEvent(QPaintEvent *e)
 	p2->setY(refSigPlotAreaEnd.ry());
 	painter.drawRect(QRect(*p1,*p2));
 		
+	//1d) Write the labels
+	QString referenceString = QString::fromStdString("Reference Index");
+	QString queryString = QString::fromStdString("Query Index");
+	QString title = QString::fromStdString("Timeseries Alignment");
+	
+	painter.save();
+	QFont font = painter.font();
+	font.setBold(true);
+	font.setPixelSize(16);
+	painter.setFont(font);
+	painter.drawText(330, 50, title);
+	painter.restore();
+	
+	painter.save();
+ 	painter.rotate(-90);
+	painter.drawText(-350, 40, referenceString);
+	painter.restore();
+	
+	painter.drawText(390, 690, queryString);
 
 //	2) Draw Ticks
 	//	2a) Draw refSig ticks
+	findTickValues();
+
 	int refSigStartY = 500;
 	int refSigEndY = 100;
 	int y1, y2;
-	y1 = refSigEndY; //b/c signal ends above its starting position
+	y1 = refSigEndY; //End is above start
 	y2 = refSigStartY;
 	int x= refSigPlotAreaStart.rx();
-	int numTicks = 4;
-	int spacing = ((y2 - y1)/numTicks);
+	int spacing = ((y2 - y1)/(TICKNUM-1));
+
+	int i=0;
+
 	for(int y = y1; y <= y2; y+=spacing)
 	{
  		painter.drawLine(x,y,x-10,y);
+ 		painter.save();
+ 		painter.rotate(-90);
+ 		QString num = QString::number(labelReference[TICKNUM-i-1]);
+		painter.drawText(-(y+num.length()*5), x-15, num);
+ 		painter.restore();
+ 		i++;
 	}
+	
+	int refSigStartX = 85;
+	int refSigEndX = 195;
+	int widthRef=refSigEndX-refSigStartX;
+	int offset1=5;
+	int spacingX=(widthRef-offset1*2)/(TICKNUMX-1);
+	int yRef= refSigPlotAreaStart.ry();
+	
+	i=0;
+	double numX=1.0;
+	
+	for(int k=refSigStartX+offset1; k<=refSigEndX; k+=spacingX){
+		painter.drawLine(k,yRef,k,yRef-5);
+		
+		if(i%2==0){
+			QString num = QString::number(numX-i*0.2);
+			painter.drawText(k-num.length()*3, yRef-10, num);
+		}
+		
+		i++;
+	} 
+	
 
 	//	2b) Draw querySig ticks
 	int querySigStartX = 230;
@@ -81,16 +132,47 @@ void PlotDTW::paintEvent(QPaintEvent *e)
 	int x1, x2;
 	x1 = querySigStartX;
 	x2 = querySigEndX;
-	spacing = (x2 - x1)/numTicks;
-	int y = querySigPlotAreaEnd.ry();	
+	spacing = (x2 - x1)/(TICKNUM-1);
+	int y = querySigPlotAreaEnd.ry();
+
+	i=0;	
+
 	for(int x = x1; x <= x2; x+= spacing)
 	{
 		painter.drawLine(x,y,x,y+10);
+		QString num = QString::number(labelQuery[i]);
+		painter.drawText(x-num.length()*5, y+25, num);
+		i++;
 	}
+	
+	int querySigStartY = 528;
+	int querySigEndY = 640;
+	int heightQuery=querySigEndY-querySigStartY;
+	int spacingY=(heightQuery-offset1*2)/(TICKNUMX-1);
+	int xRef= querySigPlotAreaStart.rx();
+	
+	i=0;
+	double numY=1;
+	
+	for(int k=querySigStartY+offset1; k<=querySigEndY; k+=spacingY){
+		painter.drawLine(xRef,k,xRef-5,k);
+		
+		if((i-1)%2==0){
+			painter.save();
+	 		painter.rotate(-90);
+	 		QString num = QString::number(numY-i*0.2);
+			painter.drawText(-(k+num.length()*3), xRef-10, num);
+	 		painter.restore();
+		}
+		
+		i++;
+	} 
+
+
 
 //	3) Draw querySig
 	std::vector<double> sigVector = myDTW.getFirst().getData();
-	// pick 500 points from querySig: start - end/500
+	// pick 500 points from querySig: start - end/400
 	spacing = sigVector.size()/(querySigEndX - querySigStartX);
 	// height = qsigstarty-endy * val of selection
 	int vscale = querySigPlotAreaStart.ry() - querySigPlotAreaEnd.ry();
@@ -106,18 +188,36 @@ void PlotDTW::paintEvent(QPaintEvent *e)
 	}
 
 //	4) Draw refSig
-	std::vector<double> refVector = myDTW.getSecond().getData();
-	//pick 500 points from refSig: (start - end)/500
-	spacing = refVector.size()/(refSigEndY - refSigStartY);
-	int hscale = refSigPlotAreaStart.rx() - refSigPlotAreaEnd.rx();
-	x1 = refSigPlotAreaEnd.rx() - hscale*refVector[0];
+	sigVector = myDTW.getSecond().getData();
+	//pick 400 points from refSig: (start - end)/400
+	spacing = sigVector.size()/(refSigStartY - refSigEndY);
+	int hscale = refSigPlotAreaEnd.rx() - refSigPlotAreaStart.rx();
+	x1 = refSigPlotAreaEnd.rx() - hscale*sigVector[0];
 	y1 = refSigStartY;
-	std::cout<< (refSigStartY - refSigEndY) << std::endl;
 	for(int i = 1; i<= (refSigStartY - refSigEndY); i++){
 		y2 = y1 - 1;
-		x2 = refSigPlotAreaEnd.rx() - hscale*refVector[i*spacing];
+		x2 = refSigPlotAreaEnd.rx() - hscale*sigVector[i*spacing];
 		painter.drawLine(x1,y1,x2,y2);
 		y1 = y2;
 		x1 = x2;
+	}
+
+//	5) Draw timeSeries Alignment
+	sigVector = myDTW.getComparison();
+	painter.drawLine(querySigStartX,refSigStartY,querySigEndX,refSigEndY);
+}
+
+
+void PlotDTW::findTickValues()
+{
+	DummySignal query = myDTW.getFirst();
+	DummySignal reference = myDTW.getSecond();
+
+	std::vector<double> queryVec = query.getData();
+	std::vector<double> referenceVec = reference.getData();
+
+	for(int i=0; i<TICKNUM; i++){
+		labelQuery[i] = ((double)queryVec.size()/(TICKNUM-1))*i;
+		labelReference[i] = ((double)referenceVec.size()/(TICKNUM-1))*i;
 	}
 }
