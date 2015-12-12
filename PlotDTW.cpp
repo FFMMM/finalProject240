@@ -205,13 +205,20 @@ void PlotDTW::paintEvent(QPaintEvent *e)
 	}
 
 //	5) Draw timeSeries Alignment
-	sigVector = myDTW.getComparison();
+	std::vector<DTW::Coord> compVector = myDTW.getComparison();
 	//no "spacing" term here; hopefully drawline (x1,y1,x1,y1) does nothing
 	double hscaleDBL = (querySigEndX - querySigStartX)/((double) myDTW.getFirst().getData().size());
 	double vscaleDBL = (refSigStartY - refSigEndY)/((double) myDTW.getSecond().getData().size());
-	 
-	for(int i = sigVector.size()
-	painter.drawLine(querySigStartX,refSigStartY,querySigEndX,refSigEndY);
+	x1 = querySigEndX;
+	y1 = refSigEndY;
+	for(int i = compVector.size() - 1; i >= 0; i--)
+	{
+		x2 = querySigStartX + (int) round(hscaleDBL*compVector[i].x);
+		y2 = refSigStartY + (int) round(vscaleDBL*compVector[i].y);
+		painter.drawLine(x1,y1,x2,y2);
+		x1 = x2;
+		y1 = y2;
+	}
 
 }
 
