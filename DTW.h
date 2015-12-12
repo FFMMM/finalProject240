@@ -36,16 +36,15 @@ class DTW
 		void setSecond(Signal signalB);
 		//overload the equals operators in Signal class?
 
-		void compare(); // method compares SignalA to SignalB
+		double compare(); // method compares SignalA to SignalB
 
 	private:
 		Signal mySignalA; //instances of the Signal class initialized in the constructor or modified through provided mutators
 		Signal mySignalB;
 		bool myCompared; // boolean variable that establishes if comparison has to be made between the signals before returning the myComparison vector
 		vector<Coord> myComparison; // vector that holds the result of the comparison between  the two Signals.
-		void initiateDTW(); // method calls on the data forwarding algorithm
+		double initiateDTW(); // method calls on the data forwarding algorithm
 		double DTWDistance(vector<double> first, vector<double> second, int windowSize); // method performs the DTW and updates the myComparison vector.
-
 };
 
 #endif 

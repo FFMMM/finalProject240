@@ -7,7 +7,7 @@
 #include <QString>
 #include <vector>
 
-#include "DummyDTW.h"
+#include "DTW.h"
 
 namespace Ui {
     class PlotDTW;
@@ -20,11 +20,11 @@ class PlotDTW : public QMainWindow //Plot extends a Window
     public:
         explicit PlotDTW(QWidget *parent = 0);
 	~PlotDTW();
-        void setDTW(DummyDTW aDTW);
+        void setDTW(DTW aDTW);
 
     private:
         Ui::PlotDTW *ui;
-	    DummyDTW myDTW;
+	    DTW myDTW;
 
         const static int TICKNUM = 5;
         const static int TICKNUMX = 6;

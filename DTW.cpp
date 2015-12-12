@@ -3,9 +3,11 @@
 #include <iostream>
 #include <cmath> // for the absolute function
 #include <algorithm> // for the max function
-#include <float.h>
+#include <cfloat> //for DBL_MAX
 #include <limits.h>
 #include <climits>
+
+using namespace std;
 
 DTW::DTW(Signal signalA, Signal signalB)
 // Constructor takes in two Signal instances and initializes its own private Signal fields.	
@@ -67,9 +69,10 @@ void DTW::setSecond(Signal signalB)
 }
 
 
-void DTW::compare()
+double DTW::compare()
 // Method compares SignalA to SignalB
 {
+	double res = 0;
 	if(getFirst() == getSecond())
 	{
 		//Do nothing else but:
@@ -78,90 +81,98 @@ void DTW::compare()
 			myComparison.push_back(Coord());
 			myComparison[i].x = i;
 			myComparison[i].y = i;
+			res = 0;
 		}
 	}
 	else
-	{ 
-		initiateDTW();
+	{
+		res = initiateDTW();
 	}
 	myCompared = true;
+	return res;
 }
 
 // ------------- Public Interface Ends -----------------------
 
-void DTW::initiateDTW()
+double DTW::initiateDTW()
 // method calls on the data forwarding algorithm
 {	
 	// we want to add a locality constraint
 	int windowSize = abs((int)(mySignalA.getData().size() - mySignalB.getData().size()));
-
-	DTWDistance(mySignalA.getData(), mySignalB.getData(), windowSize);
-
+	return DTWDistance(mySignalA.getData(), mySignalB.getData(), windowSize);
 }
 
 double DTW::DTWDistance(vector<double> first, vector<double> second, int windowSize)
 // method builds the cost matrix, finds minimizing path,
 // and returns total distance between signals
 {
-	double myDTW[first.size()+1][second.size()+1];
-
 	int first_size = first.size();
 	int second_size = second.size();
+	//double myDTW[first_size+1][second_size+1];
+	//Allocating this array on the stack doesn't seem to work. Not enough mem.
+	//Stackoverflow said to do it on the heap or do a vector, so here goes.
+	vector< vector<double> > myDTW(first_size, vector<double>(second_size, DBL_MAX)); 
 
 	windowSize = max(windowSize, abs(first_size - second_size));
 
 	// intializing all entries to the most "expensive" path possible
 	for(int i = 0; i < first_size; i++)
-		for(int j = 0; j < second_size; j++)
-			myDTW[i][j] = DBL_MAX;
-
+	{
+	    for(int j = 0; j < second_size; j++)
+	    {
+		myDTW[i][j] = DBL_MAX;
+	    }
+	}
 	myDTW[0][0] = 0;
 
 	double cost = 0; 
 
 	for(int i = 1; i < first_size; i++)
-		for(int j = max(1, (i-windowSize) ); j < min(second_size, (i + windowSize)); j++)
-		{
-			cost = abs(first.at(i) - second.at(i));
+	{
+	    for(int j = max(1, (i-windowSize) ); j < min(second_size, (i + windowSize)); j++)
+	    {
+		cost = abs(first.at(i) - second.at(i));
+		myDTW[i][j] = cost + min(myDTW[i-1][j], min(myDTW[i][j-1], myDTW[i-1][j-1])); //where the minimum compares the inseration, deletion and match cases
+	    }
+	}
 
-			myDTW[i][j] = cost + min(myDTW[i-1][j], min(myDTW[i][j-1], myDTW[i-1][j-1])); //where the minimum compares the inseration, deletion and match cases
-		}
-/*
 //This material added by David B. -----
 	//Backtrack from upper right-hand corner
-	int i = getFirst.size() - 1;
-	int j = getSecond.size() - 1;
-	while (i >= 0 && j >= 0)
+	int i = first_size - 1;
+	int j = second_size - 1;
+	while (i > 0 && j > 0)
 	{
-	myComparison.push_back(Coord());
-	myComparison.back.x = i;
-	myComparison.back.y = j;
-		if (i==0)
+	    myComparison.push_back(Coord());
+	    myComparison.back().x = i;
+	    myComparison.back().y = j;
+	    if (i==0)
+	    {
+		--j;
+	    }
+	    else if (j==0)
+	    {	
+		--i;
+	    }
+	    else
+	    {
+		if (myDTW[i-1][j] == min(min(myDTW[i-1][j], myDTW[i-1][j-1]), myDTW[i][j-1]))
 		{
-			--j;
+	  	    --i;
 		}
-		else if (j==0)
+		else if (myDTW[i-1][j-1] == min(min(myDTW[i-1][j], myDTW[i-1][j-1]), myDTW[i][j-1]))
 		{
-			--i;
+		    --i;
+		    --j;
 		}
 		else
 		{
-			if (myDTW[i-1][j] == min(myDTW[i-1][j], myDTW[i-1][j-1], myDTW[i][j-1]))
-			{
-				--i;
-			}
-			else if (myDTW[i-1][j-1] == min(myDTW[i-1][j], myDTW[i-1][j-1], myDTW[i][j-1]))
-			{
-				--i;
-				--j;
-			}
-			else
-			{
-				--j;
-			}
+		    --j;
 		}
+	    }
 	}
+	myComparison.push_back(Coord());
+	myComparison.back().x = 0;
+	myComparison.back().y = 0;
 //End David B. addition -----
-*/
-	return myDTW[first.size()][second.size()];
+	return myDTW[first_size-1][second_size-1];
 }

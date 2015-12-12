@@ -1,6 +1,8 @@
 #include "PlotDTW.h"
 #include "ui_PlotDTW.h"
 
+#include <math.h> //for rounding
+
 PlotDTW::PlotDTW(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::PlotDTW)
@@ -15,7 +17,7 @@ PlotDTW::~PlotDTW()
     delete ui;
 }
 
-void PlotDTW::setDTW(DummyDTW aDTW)
+void PlotDTW::setDTW(DTW aDTW)
 {
 	myDTW = aDTW;
 }
@@ -204,14 +206,20 @@ void PlotDTW::paintEvent(QPaintEvent *e)
 
 //	5) Draw timeSeries Alignment
 	sigVector = myDTW.getComparison();
+	//no "spacing" term here; hopefully drawline (x1,y1,x1,y1) does nothing
+	double hscaleDBL = (querySigEndX - querySigStartX)/((double) myDTW.getFirst().getData().size());
+	double vscaleDBL = (refSigStartY - refSigEndY)/((double) myDTW.getSecond().getData().size());
+	 
+	for(int i = sigVector.size()
 	painter.drawLine(querySigStartX,refSigStartY,querySigEndX,refSigEndY);
+
 }
 
 
 void PlotDTW::findTickValues()
 {
-	DummySignal query = myDTW.getFirst();
-	DummySignal reference = myDTW.getSecond();
+	Signal query = myDTW.getFirst();
+	Signal reference = myDTW.getSecond();
 
 	std::vector<double> queryVec = query.getData();
 	std::vector<double> referenceVec = reference.getData();
