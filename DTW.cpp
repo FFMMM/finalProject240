@@ -136,8 +136,7 @@ double DTW::DTWDistance(vector<double> first, vector<double> second, int windowS
 	    }
 	}
 
-//This material added by David B. -----
-	//Backtrack from upper right-hand corner
+
 	int i = first_size - 1;
 	int j = second_size - 1;
 	while (i > 0 && j > 0)
@@ -173,6 +172,6 @@ double DTW::DTWDistance(vector<double> first, vector<double> second, int windowS
 	myComparison.push_back(Coord());
 	myComparison.back().x = 0;
 	myComparison.back().y = 0;
-//End David B. addition -----
+
 	return myDTW[first_size-1][second_size-1];
 }
