@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'PlotDTW.ui'
 **
-** Created: Sat Dec 12 12:17:09 2015
+** Created: Sat Dec 12 17:34:51 2015
 **      by: Qt User Interface Compiler version 4.6.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

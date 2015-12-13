@@ -144,6 +144,7 @@ double DTW::DTWDistance(vector<double> first, vector<double> second, int windowS
 	    myComparison.push_back(Coord());
 	    myComparison.back().x = i;
 	    myComparison.back().y = j;
+	    cout << i << "\t" << j << endl;
 	    if (i==0)
 	    {
 		--j;
@@ -155,18 +156,18 @@ double DTW::DTWDistance(vector<double> first, vector<double> second, int windowS
 	    else
 	    {
 		if (myDTW[i-1][j] == min(min(myDTW[i-1][j], myDTW[i-1][j-1]), myDTW[i][j-1]))
-		{
-	  	    --i;
-		}
-		else if (myDTW[i-1][j-1] == min(min(myDTW[i-1][j], myDTW[i-1][j-1]), myDTW[i][j-1]))
-		{
-		    --i;
-		    --j;
-		}
-		else
-		{
-		    --j;
-		}
+			{
+		  	    --i;
+			}
+			else if (myDTW[i-1][j-1] == min(min(myDTW[i-1][j], myDTW[i-1][j-1]), myDTW[i][j-1]))
+			{
+			    --i;
+			    --j;
+			}
+			else
+			{
+			    --j;
+			}
 	    }
 	}
 	myComparison.push_back(Coord());

@@ -209,16 +209,41 @@ void PlotDTW::paintEvent(QPaintEvent *e)
 	//no "spacing" term here; hopefully drawline (x1,y1,x1,y1) does nothing
 	double hscaleDBL = (querySigEndX - querySigStartX)/((double) myDTW.getFirst().getData().size());
 	double vscaleDBL = (refSigStartY - refSigEndY)/((double) myDTW.getSecond().getData().size());
-	x1 = querySigEndX;
-	y1 = refSigEndY;
+	x1 = querySigStartX;
+	y1 = refSigStartY;
+	/*for(int i = 1; i<= 3; i++)
+	{
+		int x1 = querySigEndX - (int) round(hscaleDBL*compVector[compVector.size()-10*i].x);
+		QString tempNum = QString::number(x1);
+		painter.drawText(0, 20+ 20*i, tempNum);
+		int y1 = refSigStartY - (int) round(vscaleDBL*compVector[10*i].y);
+		tempNum = QString::number(y1);
+		painter.drawText(75, 20+ 20*i, tempNum);
+		painter.drawText(x1,y1,"LOOOOONG AMOUNT OF TEXT");
+	}*/
+	
 	for(int i = compVector.size() - 1; i >= 0; i--)
 	{
+		int x1 = querySigStartX + (int) round(hscaleDBL*compVector[i].x);
+		QString tempNum = QString::number(x1);
+		//painter.drawText(0, 20+ 20*i, tempNum);
+		int y1 = refSigStartY - (int) round(vscaleDBL*compVector[i].y);
+		tempNum = QString::number(y1);
+		painter.drawLine(x1, y1, x1-2, y1-2);
+		//painter.drawText(75, 20+ 20*i, tempNum);
+		//painter.drawText(x1,y1,"LOOOOONG AMOUNT OF TEXT");
+	}
+
+	/*for(int i = compVector.size() - 1; i >= 0; i--)
+	{
 		x2 = querySigStartX + (int) round(hscaleDBL*compVector[i].x);
-		y2 = refSigStartY + (int) round(vscaleDBL*compVector[i].y);
+		y2 = refSigStartY - (int) round(vscaleDBL*compVector[i].y);
 		painter.drawLine(x1,y1,x2,y2);
+		//painter.drawText(x2,y2,"o");
 		x1 = x2;
 		y1 = y2;
-	}
+	}*/
+	
 
 }
 

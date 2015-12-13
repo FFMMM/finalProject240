@@ -69,19 +69,25 @@ vector<double> Signal::getData()
 void Signal::normalize(vector< vector<double> >& data)
 {	
 	for(unsigned int k=0; k<data.size(); k++){
-		double sum = 0;
+		double max = -DBL_MAX;
+		double min = DBL_MAX;
 		
 		//Find the min and max
 		for(unsigned int i=0; i<data.at(0).size(); i++){
-			sum+=pow(data[k][i], 2);
+			if(max<data[k][i])
+				max=data[k][i];
+			if(min>data[k][i])
+				min=data[k][i];
 		}
 		
-		double length = sqrt(sum);
 		
 		//Normalize all the elements
 		for(unsigned int i=0; i<data.at(0).size(); i++){
-			if(length!=0)
-				data[k][i] = data[k][i]/length;
+			//If it's all the same values, just put in 0.5 for the entire signal so you can see it
+			if((max-min)==0)
+				data[k][i]=0.5;
+			else
+				data[k][i] = (data[k][i]-min)/(max-min);
 		}
 	}
 }
@@ -89,7 +95,7 @@ void Signal::normalize(vector< vector<double> >& data)
 
 //Concatenates all the signal data, making the final single vector
 void Signal::concatenate(vector< vector<double> >& data)
-{
+{  
 	for(unsigned int i=0; i<data.size(); i++){
 		for(unsigned int k=0; k<data.at(0).size(); k++){
 			signalData.push_back(data[i][k]);
